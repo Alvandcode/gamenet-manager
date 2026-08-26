@@ -1,0 +1,11 @@
+{
+  "name": "gamenet-manager-alvand",
+  "displayName": "Gamenet Manager Alvand",
+  "version": "1.0.0",
+  "description": "مدیریت گیم‌نت الوند",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": ["cordova", "android"],
+  "author": "Alvand",
+  "license": "ISC"
+}

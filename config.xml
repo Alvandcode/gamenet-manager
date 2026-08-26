@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.alvand.gamenet.manager" version="1.0.0" 
+        xmlns="http://www.w3.org/ns/widgets" 
+        xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    
+    <name>Gamenet Manager Alvand</name>
+    <description>مدیریت گیم‌نت الوند</description>
+    <author email="you@example.com" href="#">Alvand</author>
+    
+    <content src="index.html" />
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    
+    <preference name="Orientation" value="default" />
+    <preference name="BackgroundColor" value="0xFF0f0c29" />
+    <preference name="Fullscreen" value="false" />
+    
+</widget>
