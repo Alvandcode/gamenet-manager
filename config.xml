@@ -13,7 +13,7 @@
     <allow-intent href="https://*/*" />
     
     <preference name="Orientation" value="default" />
-    <preference name="BackgroundColor" value="0xFF0f0c29" />
+    <preference name="BackgroundColor" value="#FF0F0C29" />
     <preference name="Fullscreen" value="false" />
     
 </widget>
