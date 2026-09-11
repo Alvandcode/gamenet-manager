@@ -1,3 +1,19 @@
+# GameNet Manager
+
+[![Stars](https://img.shields.io/github/stars/Alvandcode/gamenet-manager?style=flat-square)](https://github.com/Alvandcode/gamenet-manager/stargazers) [![License](https://img.shields.io/github/license/Alvandcode/gamenet-manager?style=flat-square)](./LICENSE) [![Last commit](https://img.shields.io/github/last-commit/Alvandcode/gamenet-manager?style=flat-square)](https://github.com/Alvandcode/gamenet-manager/commits)
+
+> Android management app for game centers — devices, customers, timers, billing and extra services, phone/tablet friendly.
+
+<div dir="rtl">
+
+## اپ مدیریت گیم‌نت
+
+اپلیکیشن اندرویدی مدیریت گیم‌نت؛ مدیریت دستگاه‌ها و مشتریان، زمان‌سنجی، محاسبه هزینه و خدمات جانبی، مناسب موبایل و تبلت.
+
+</div>
+
+---
+
 # 🎮 GameNet Manager
 
 **GameNet Manager** یک اپلیکیشن مدیریت گیم‌نت برای **Android** است که با هدف ساده‌تر کردن مدیریت دستگاه‌ها، کاربران، زمان استفاده و هزینه‌ها طراحی شده است.
@@ -136,3 +152,19 @@ https://github.com/Alvandcode
 اگر این پروژه برای شما مفید است، با ⭐ دادن به Repository در GitHub از توسعه آن حمایت کنید.
 
 **GameNet Manager — ساده‌تر، سریع‌تر و حرفه‌ای‌تر مدیریت کنید.** 🎮
+
+---
+
+## Contributing / مشارکت
+
+- EN: Issues and Pull Requests are welcome. Please see `CONTRIBUTING.md`.
+- FA: برای گزارش مشکل یا پیشنهاد قابلیت جدید، لطفا ایشو یا پول‌ریکوئست ثبت کنید.
+
+## License / لایسنس
+
+MIT — see [LICENSE](./LICENSE).
+
+## Contact / ارتباط
+
+- Telegram: https://t.me/a_c_official
+- Website: https://alvandcode.github.io
