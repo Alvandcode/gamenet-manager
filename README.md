@@ -77,21 +77,39 @@
 
 ## 🚀 نصب
 
-برای استفاده از برنامه، نسخه Android پروژه را دریافت و روی دستگاه Android خود نصب کنید.
+این پروژه **Cordova** است (نگاه کنید به `config.xml` و `www/index.html`)؛ خروجی اندروید از وب‌اپ داخل `www/` ساخته می‌شود.
 
-> در صورت انتشار فایل APK، می‌توانید آن را از بخش **Releases** همین مخزن دریافت کنید.
+### روش ۱ — نصب آماده (پیشنهادی)
+
+فایل `app-debug.apk` در بخش [Releases](https://github.com/Alvandcode/gamenet-manager/releases) موجود است (ساخته‌شده خودکار با GitHub Actions)؛ دانلود و روی گوشی نصب کنید.
+
+### روش ۲ — بیلد از سورس
+
+پیش‌نیازها: **Node.js** (همراه npm)، **JDK 17** و **Gradle**، و **Android SDK** (همراه platform-tools).
+
+```bash
+git clone https://github.com/Alvandcode/gamenet-manager.git
+cd gamenet-manager
+
+npm install -g cordova
+
+cordova platform add android
+
+# اجرا روی دستگاه/شبیه‌ساز:
+cordova run android
+
+# یا فقط بیلد APK دیباگ:
+cordova build android
+# خروجی: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+> نکته: فیلد `scripts` در `package.json` خالی است، پس دستورهای `cordova` را مستقیم اجرا کنید (اسکریپت npm میانی وجود ندارد).
 
 ---
 
 ## 📦 ساخت پروژه
 
-برای توسعه یا Build کردن پروژه، ابتدا مخزن را Clone کنید:
-
-```bash
-git clone https://github.com/Alvandcode/gamenet-manager.git
-```
-
-سپس پروژه را در محیط توسعه مناسب Android باز کرده و وابستگی‌های موردنیاز را نصب کنید.
+برای توسعه یا بیلد محلی، مخزن را Clone کنید و طبق بخش «نصب» پیش‌نیازها (Node، JDK/Gradle، Android SDK) را آماده کنید؛ سپس با `cordova platform add android` و `cordova build android` خروجی بگیرید. بیلد خودکار CI هم روی هر push به `main` اجرا می‌شود (نگاه کنید به `.github/workflows/build-android.yml`) و APK را در Releases منتشر می‌کند.
 
 ---
 
@@ -162,7 +180,7 @@ https://github.com/Alvandcode
 
 ## License / لایسنس
 
-MIT — see [LICENSE](./LICENSE).
+لایسنس: ANCSL 1.0 غیرتجاری (متن کامل در LICENSE) — see [LICENSE](./LICENSE).
 
 ## Contact / ارتباط
 
