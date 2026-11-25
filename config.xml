@@ -19,7 +19,7 @@
     <allow-intent href="rubika:*" />
     
     <preference name="Orientation" value="default" />
-    <preference name="BackgroundColor" value="0xFF0F0C29" />
+    <preference name="BackgroundColor" value="#FF0F0C29" />
     <preference name="Fullscreen" value="false" />
     
     <platform name="android">
