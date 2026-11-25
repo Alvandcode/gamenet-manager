@@ -4,8 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gamenet Manager Alvand</title>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' file: blob: data:; script-src 'self' file: 'unsafe-inline'; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob:; connect-src 'self' file:">
     <style>
+        /* فونت Vazirmatn به‌صورت آفلاین داخل برنامه */
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('fonts/Vazirmatn-Variable.woff2') format('woff2-variations');
+            font-weight: 100 900;
+            font-style: normal;
+            font-display: swap;
+        }
         :root {
             --glass-bg: rgba(255, 255, 255, 0.08);
             --glass-border: rgba(255, 255, 255, 0.18);
@@ -425,8 +433,6 @@
         .alarm-overlay.show { display: flex; animation: blink 0.6s infinite; }
 
 </style>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <div class="bg-particles" id="particles"></div>
@@ -482,6 +488,9 @@
                 <div class="nav-item" onclick="showSection('customers', this)">
                     <span style="font-size: 1.3rem;">&#128100;</span> مشتریان
                 </div>
+                <div class="nav-item" onclick="showSection('backup', this)">
+                    <span style="font-size: 1.3rem;">&#128190;</span> پشتیبان‌گیری
+                </div>
             </nav>
 
             <div style="padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
@@ -510,7 +519,7 @@
                     </div>
                     <div class="glass" style="padding: 24px; text-align: center;">
                         <div style="font-size: 2.5rem; margin-bottom: 8px;">&#128176;</div>
-                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.5);">درآمد امروز</p>
+                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.5);">درآمد امروز (سشن‌های پایان‌یافته)</p>
                         <p id="statIncome" style="font-size: 2rem; font-weight: 900; color: #818cf8;">0 تومان</p>
                     </div>
                     <div class="glass" style="padding: 24px; text-align: center;">
@@ -525,9 +534,7 @@
                         <span>&#128202;</span> نمودار درآمد هفتگی
                     </h2>
                     <div id="weeklyChart" style="display: flex; align-items: flex-end; justify-content: space-around; height: 200px; gap: 15px; padding: 20px 0;"></div>
-                    <div style="display: flex; justify-content: space-around; margin-top: 10px; color: rgba(255,255,255,0.5); font-size: 0.8rem;">
-                        <span>شنبه</span><span>یکشنبه</span><span>دوشنبه</span><span>سه‌شنبه</span><span>چهارشنبه</span><span>پنجشنبه</span><span>جمعه</span>
-                    </div>
+                    <div id="weeklyChartLabels" style="display: flex; justify-content: space-around; margin-top: 10px; color: rgba(255,255,255,0.5); font-size: 0.8rem;"></div>
                 </div>
 
                 <div class="glass" style="padding: 24px;">
@@ -596,7 +603,7 @@
                     <div class="glass income-card" style="padding: 30px;">
                         <h3 style="margin-bottom: 16px;">&#128197; درآمد امروز</h3>
                         <p id="incomeToday" style="font-size: 2.5rem; font-weight: 900; color: #22c55e;">0 تومان</p>
-                        <p style="color: rgba(255,255,255,0.5); margin-top: 8px;">بر اساس کلاینت‌های فعال</p>
+                        <p style="color: rgba(255,255,255,0.5); margin-top: 8px;">بر اساس سشن‌های پایان‌یافته</p>
                     </div>
                     <div class="glass income-card" style="padding: 30px;">
                         <h3 style="margin-bottom: 16px;">&#128198; درآمد این هفته</h3>
@@ -640,7 +647,7 @@
             <section id="customers-section" class="section" style="display: none;">
                 <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 24px;">&#128100; مشتریان و مخاطبین</h1>
                 <div class="glass" style="padding: 24px; margin-bottom: 20px;">
-                    <p style="color: rgba(255,255,255,0.6); margin-bottom:12px;">لیست مشتریانی که رزرو یا سشن داشته‌اند - برای ارسال گزارش PDF استفاده میشود</p>
+                    <p style="color: rgba(255,255,255,0.6); margin-bottom:12px;">لیست مشتریانی که رزرو ثبت کرده‌اند - برای ارسال گزارش PDF استفاده میشود</p>
                     <div id="customersList"></div>
                 </div>
                 <div class="glass" style="padding: 24px;">
@@ -653,11 +660,23 @@
                     </div>
                 </div>
             </section>
+        <!-- Backup Section -->
+        <section id="backup-section" class="section" style="display: none;">
+            <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 24px;">&#128190; پشتیبان‌گیری و بازیابی</h1>
+            <div class="glass" style="padding: 24px;">
+                <p style="color: rgba(255,255,255,0.6); margin-bottom: 16px;">تمام داده‌ها (کلاینت‌ها، تعرفه‌ها، سشن‌ها و رزروها) در حافظه داخلی دستگاه ذخیره می‌شود و با حذف برنامه پاک می‌گردد. به‌طور منظم فایل پشتیبان بگیرید.</p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <button class="glass-btn glass-btn-success" onclick="exportBackup()">&#11015; دریافت فایل پشتیبان (JSON)</button>
+                    <button class="glass-btn" onclick="document.getElementById('backupFileInput').click()">&#11014; بازیابی از فایل پشتیبان</button>
+                    <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none" onchange="importBackup(event)">
+                </div>
+            </div>
+        </section>
         </main>
     </div>
 
     <!-- Add Client Modal -->
-    <div class="modal-overlay" id="addClientModal">
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="addClientModal">
         <div class="glass" style="width: 90%; max-width: 500px; padding: 32px; animation: slideIn 0.4s ease;">
             <h2 style="margin-bottom: 24px; text-align: center;">&#10133; افزودن کلاینت جدید</h2>
             <div style="margin-bottom: 16px;">
@@ -687,7 +706,7 @@
     </div>
 
     <!-- Time Management Modal -->
-    <div class="modal-overlay" id="timeModal">
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="timeModal">
         <div class="glass" style="width: 90%; max-width: 450px; padding: 32px; animation: slideIn 0.4s ease;">
             <h2 style="margin-bottom: 20px; text-align: center;">&#9201; مدیریت زمان</h2>
             <div style="text-align: center; margin-bottom: 24px;">
@@ -736,7 +755,7 @@
 
 
     <!-- Reservation Modal -->
-    <div class="modal-overlay" id="reservationModal">
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="reservationModal">
         <div class="glass" style="width: 90%; max-width: 550px; padding: 32px; animation: slideIn 0.4s ease; max-height: 90vh; overflow-y:auto;">
             <h2 style="margin-bottom: 20px; text-align: center;">&#128197; رزرو کلاینت</h2>
             <input type="hidden" id="reservationId">
@@ -802,7 +821,7 @@
     </div>
 
     <!-- Share / PDF Modal -->
-    <div class="modal-overlay" id="shareModal">
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="shareModal">
         <div class="glass" style="width: 90%; max-width: 520px; padding: 28px; animation: slideIn 0.4s ease; max-height:90vh; overflow-y:auto;">
             <h2 style="margin-bottom: 16px; text-align: center;">&#128231; ارسال گزارش</h2>
             <p id="shareClientName" style="text-align:center; color: rgba(255,255,255,0.6); margin-bottom:16px;"></p>
@@ -832,7 +851,7 @@
     </div>
 
     <!-- Timer End Alarm Modal -->
-    <div class="modal-overlay" id="timerEndModal" style="z-index: 200;">
+    <div class="modal-overlay" role="dialog" aria-modal="true" id="timerEndModal" style="z-index: 200;">
         <div class="glass" style="width: 90%; max-width: 450px; padding: 32px; text-align:center; border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.12);">
             <div style="font-size: 3.5rem; margin-bottom:16px;">⏰</div>
             <h2 style="margin-bottom:12px; color:#fca5a5;">زمان به پایان رسید!</h2>
@@ -855,27 +874,51 @@
         <div id="pdfContentInner"></div>
         <div style="margin-top:30px; border-top:1px solid #e2e8f0; padding-top:12px; display:flex; justify-content:space-between; font-size:12px; color:#64748b;">
             <span id="pdfDate"></span>
-            <span>Alvand Gamenet Manager v1.1.0</span>
+            <span id="pdfVersion"></span>
         </div>
     </div>
 
     <div id="toast" class="toast"></div>
-    <audio id="alarmSound" preload="auto"></audio>
 
+    <script src="vendor/html2pdf.bundle.min.js"></script>
+    <script src="cordova.js"></script>
     <script>
+    const APP_VERSION='1.1.0';
+
+    // ===== Security & Safety Helpers =====
+    // escape متنی برای جلوگیری از XSS در همه رندرها
+    function esc(s) {
+        return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+    // نام فایل امن برای PDF
+    function safeName(s) { return String(s ?? '').replace(/[\/:*?"<>|]/g, '').trim().slice(0, 60) || 'report'; }
+    function loadJSON(key, fallback) {
+        try {
+            let v = JSON.parse(localStorage.getItem(key));
+            return (v === null || v === undefined) ? fallback : v;
+        } catch (e) { console.error('corrupt data in ' + key, e); return fallback; }
+    }
+    function saveJSON(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+        catch (e) {
+            console.error('save failed: ' + key, e);
+            showToast('حافظه پر است! ذخیره نشد - از بخش پشتیبان‌گیری خروجی بگیرید', 'error');
+            return false;
+        }
+    }
+
     // Data Store - enhanced
-    let clients = JSON.parse(localStorage.getItem('alvand_clients')) || [];
-    let tariffs = JSON.parse(localStorage.getItem('alvand_tariffs')) || { single: 15000, double: 25000, extra: 8000 };
-    let sessions = JSON.parse(localStorage.getItem('alvand_sessions')) || [];
-    let reservations = JSON.parse(localStorage.getItem('alvand_reservations')) || [];
-    let currentTimeClient = null;
+    let clients = loadJSON('alvand_clients', []);
+    let tariffs = loadJSON('alvand_tariffs', { single: 15000, double: 25000, extra: 8000 });
+    let sessions = loadJSON('alvand_sessions', []);
+    let reservations = loadJSON('alvand_reservations', []);
+    let currentTimeClientId = null;   // شناسه کلاینتی که مودال زمانش باز است
     let timerInterval = null;
     let currentFilter = 'all';
     let currentPdfBlob = null;
     let currentPdfFilename = '';
     let currentShareText = '';
-    let alarmClientIndex = null;
-    let alarmInterval = null;
+    let alarmClientId = null;   // شناسه کلاینتِ آلارم باز
 
     // Migration for old clients
     clients.forEach(c=>{
@@ -885,6 +928,8 @@
         if(c.notified===undefined) c.notified = false;
         if(!c.reservations) c.reservations=[];
     });
+    // هر سشن شناسه یکتا (سازگاری با سشن‌های قدیمی)
+    sessions.forEach((s, i)=>{ if(!s.id) s.id = 's' + Date.now() + '-' + i; });
 
     // Initialize
     function init() {
@@ -901,9 +946,12 @@
         renderReservations();
         renderCustomers();
         updateReservationBadge();
+        // منقضی کردن رزروهای pending گذشته
+        if(expirePendingReservations()) renderReservations();
         // migrate reservations clientName
-        reservations.forEach(r=>{ if(!r.clientName){ let cl=clients.find(c=>c.id===r.clientId); if(cl) r.clientName=cl.name; }});
-        saveReservations();
+        let migrated=false;
+        reservations.forEach(r=>{ if(!r.clientName){ let cl=clients.find(c=>c.id===r.clientId); if(cl){ r.clientName=cl.name; migrated=true; } }});
+        if(migrated) saveReservations();
         // setup date default
         let d=document.getElementById('resDate'); if(d && !d.value) d.valueAsDate=new Date();
         let t=document.getElementById('resStartTime'); if(t && !t.value) t.value = new Date().toTimeString().slice(0,5);
@@ -988,12 +1036,12 @@
             }
 
             return `
-                <div class="glass client-card ${isReserved?'reserved-card':''} ${timerEnabled && remainingSec<=300 && c.status==='online' ? 'shake':''}" style="padding: 24px; position: relative; overflow: hidden;">
+                <div class="glass client-card ${isReserved?'reserved-card':''} ${timerEnabled && remainingSec<=300 && c.status==='online' ? 'shake':''}" data-cid="${c.id}" style="padding: 24px; position: relative; overflow: hidden;">
                     <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: ${c.status === 'online' ? '#22c55e' : c.status === 'paused' ? '#f59e0b' : '#ef4444'};"></div>
-                    ${isReserved? `<div style="position:absolute; top:10px; left:12px;" class="reservation-badge">🔒 رزرو: ${reserved.customerName} - ${reserved.startTime} (${reserved.duration}د)</div>`:''}
+                    ${isReserved? `<div style="position:absolute; top:10px; left:12px;" class="reservation-badge">🔒 رزرو: ${esc(reserved.customerName)} - ${esc(reserved.startTime)} (${reserved.duration}د)</div>`:''}
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px; margin-top:${isReserved?'22px':'0'};">
                         <div>
-                            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 4px;">${c.name}</h3>
+                            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 4px;">${esc(c.name)}</h3>
                             <span class="tariff-badge ${tariffClass}">${tariffLabel}</span>
                             ${c.extra > 0 ? `<span class="tariff-badge tariff-extra" style="margin-right: 6px;">+${c.extra} نفر</span>` : ''}
                             ${timerEnabled? `<span class="tariff-badge" style="margin-right:6px; background:rgba(239,68,68,0.18); color:#fca5a5; border:1px solid rgba(239,68,68,0.3);">⏱️ ${c.timerDuration}د</span>`:''}
@@ -1003,23 +1051,23 @@
 
                     <div style="text-align: center; margin: 16px 0;">
                         <p style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">زمان سپری شده</p>
-                        <p style="font-size: 1.8rem; font-weight: 900; font-variant-numeric: tabular-nums; ${timerEnabled && c.status==='online' && remainingSec<=300 ? 'color:#ef4444;':''}">${timeStr}</p>
-                        ${timerEnabled? `<div style="margin-top:6px;"><span class="countdown-badge" style="${remainingSec<=300 && c.status==='online'?'background:rgba(239,68,68,0.25); color:#fff;':''}">${c.status==='online'? '⏳ باقی‌مانده: '+remainingStr : '⏱️ تایمر: '+c.timerDuration+' دقیقه'}</span></div>` : ''}
+                        <p style="font-size: 1.8rem; font-weight: 900; font-variant-numeric: tabular-nums; ${timerEnabled && c.status==='online' && remainingSec<=300 ? 'color:#ef4444;':''}" data-elapsed>${timeStr}</p>
+                        ${timerEnabled? `<div style="margin-top:6px;"><span class="countdown-badge" data-remaining style="${remainingSec<=300 && c.status==='online'?'background:rgba(239,68,68,0.25); color:#fff;':''}">${c.status==='online'? '⏳ باقی‌مانده: '+remainingStr : '⏱️ تایمر: '+c.timerDuration+' دقیقه'}</span></div>` : ''}
                     </div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 16px;">
                         <span style="color: rgba(255,255,255,0.6);">هزینه فعلی:</span>
-                        <span style="font-weight: 900; color: #22c55e; font-size: 1.1rem;">${cost.toLocaleString()} تومان</span>
+                        <span style="font-weight: 900; color: #22c55e; font-size: 1.1rem;" data-cost>${cost.toLocaleString()} تومان</span>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom:8px;">
-                        <button class="glass-btn" style="padding: 10px 12px; font-size: 0.8rem;" onclick="openTimeModal(${i})">&#9201; مدیریت زمان</button>
-                        <button class="glass-btn" style="padding: 10px 12px; font-size: 0.8rem; background: rgba(245,158,11,0.18);" onclick="openReservationModal(${i})">&#128197; رزرو</button>
+                        <button class="glass-btn" style="padding: 10px 12px; font-size: 0.8rem;" onclick="openTimeModal(${c.id})">&#9201; مدیریت زمان</button>
+                        <button class="glass-btn" style="padding: 10px 12px; font-size: 0.8rem; background: rgba(245,158,11,0.18);" onclick="openReservationModal(${c.id})">&#128197; رزرو</button>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-                        <button class="glass-btn" style="padding: 8px 10px; font-size: 0.78rem;" onclick="openShareModalForClient(${i})">📤 ارسال</button>
-                        <button class="glass-btn" style="padding: 8px 10px; font-size: 0.78rem;" onclick="generatePdfForClient(${i})">📄 PDF</button>
-                        <button class="glass-btn glass-btn-danger" style="padding: 8px 10px; font-size: 0.78rem;" onclick="deleteClient(${i})">&#128465; حذف</button>
+                        <button class="glass-btn" style="padding: 8px 10px; font-size: 0.78rem;" onclick="openShareModalForClient(${c.id})">📤 ارسال</button>
+                        <button class="glass-btn" style="padding: 8px 10px; font-size: 0.78rem;" onclick="generatePdfForClient(${c.id})">📄 PDF</button>
+                        <button class="glass-btn glass-btn-danger" style="padding: 8px 10px; font-size: 0.78rem;" onclick="deleteClient(${c.id})">&#128465; حذف</button>
                     </div>
                 </div>
             `;
@@ -1044,7 +1092,7 @@
         if (!name) { showToast('لطفاً نام کلاینت را وارد کنید','error'); return; }
 
         clients.push({
-            id: Date.now(),
+            id: uniqueClientId(),
             name,
             tariff,
             extra,
@@ -1066,10 +1114,31 @@
         showToast('کلاینت با موفقیت اضافه شد','success');
     }
 
-    function deleteClient(index) {
+    function deleteClient(clientId) {
+        let idx = clients.findIndex(c=>c.id===clientId);
+        if (idx === -1) return;
         if (confirm('آیا از حذف این کلاینت اطمینان دارید؟')) {
-            let cid=clients[index].id;
-            clients.splice(index, 1);
+            let cid=clients[idx].id;
+            // اگر کلاینت در حال فعالیت بود، اول سشنش ثبت شود تا درآمد گم نشود
+            // (بدون باز کردن مودال اشتراک - برخلاف stopTimer معمولی)
+            let c=clients[idx];
+            if(c.status==='online' && c.startTime){
+                c.elapsed=Math.floor((Date.now()-c.startTime)/1000);
+            }
+            if((c.status==='online'||c.status==='paused') && (c.elapsed||0)>0){
+                let cost=calculateCost(c);
+                sessions.push({
+                    id: uniqueSessionId(), clientId:c.id, clientName:c.name,
+                    duration:c.elapsed, cost, extraCost: Math.round((c.extra||0)*tariffs.extra*((c.elapsed||0)/3600)),
+                    tariff:c.tariff, extra:c.extra,
+                    date:new Date().toISOString(), timerDuration:c.timerDuration||0
+                });
+                c.totalCost=(c.totalCost||0)+cost;
+            }
+            // بستن مودال/آلارم وابسته به این کلاینت
+            if(currentTimeClientId===cid){ currentTimeClientId=null; closeModal('timeModal'); }
+            if(alarmClientId===cid){ dismissAlarm(); }
+            clients.splice(idx, 1);
             // also remove reservations for this client
             reservations = reservations.filter(r=>r.clientId!==cid);
             saveData();
@@ -1082,10 +1151,33 @@
         }
     }
 
+    // شناسه یکتا ضد برخورد (Date.now() + گارد تکرار)
+    function uniqueClientId(){
+        let id=Date.now();
+        while(clients.some(c=>c.id===id)) id++;
+        return id;
+    }
+    function uniqueReservationId(){
+        let id=Date.now();
+        while(reservations.some(r=>r.id===id)) id++;
+        return id;
+    }
+    function uniqueSessionId(){
+        let n=Date.now();
+        let id='s'+n;
+        while(sessions.some(x=>x.id===id)) id='s'+(++n);
+        return id;
+    }
+
+    // دسترسی امن به کلاینت فعلی مودال زمان (id-based، مقاوم به حذف/جابه‌جایی)
+    function getClient(clientId){ return clients.find(c=>c.id===clientId) || null; }
+    function currentClient(){ return currentTimeClientId===null ? null : getClient(currentTimeClientId); }
+
     // ========== Timer Management Enhanced ==========
-    function openTimeModal(index) {
-        currentTimeClient = index;
-        const c = clients[index];
+    function openTimeModal(clientId) {
+        if(!clients.find(c=>c.id===clientId)) { currentTimeClientId = null; return; }
+        currentTimeClientId = clientId;
+        const c = getClient(currentTimeClientId);
         document.getElementById('timeClientName').textContent = c.name;
         document.getElementById('timeModal').classList.add('show');
         // show reservation warning if any
@@ -1093,28 +1185,28 @@
         let warn=document.getElementById('reservationWarning');
         if(res){
             warn.style.display='block';
-            warn.innerHTML=`🔒 <b>رزرو فعال:</b> ${res.customerName} - ${res.date} ساعت ${res.startTime} به مدت ${res.duration} دقیقه<br>اگر مشتری رزرو حاضر شد، این سشن را پایان دهید.`;
+            warn.innerHTML=`🔒 <b>رزرو فعال:</b> ${esc(res.customerName)} - ${esc(res.date)} ساعت ${esc(res.startTime)} به مدت ${res.duration} دقیقه<br>اگر مشتری رزرو حاضر شد، این سشن را پایان دهید.`;
         } else {
             // check upcoming within 1 hour
             let up=getUpcomingReservationForClient(c.id);
             if(up){
                 warn.style.display='block';
-                warn.innerHTML=`⚠️ <b>رزرو نزدیک:</b> ${up.customerName} - ${up.date} ${up.startTime} (${up.duration}د)`;
+                warn.innerHTML=`⚠️ <b>رزرو نزدیک:</b> ${esc(up.customerName)} - ${esc(up.date)} ${esc(up.startTime)} (${up.duration}د)`;
             } else warn.style.display='none';
         }
         // check conflicting if trying to start
         let conflictCheck = checkStartConflict(c.id);
         if(conflictCheck){
             warn.style.display='block';
-            warn.innerHTML=`⛔ <b>تداخل رزرو:</b> این دستگاه توسط <b>${conflictCheck.customerName}</b> برای ${conflictCheck.date} ساعت ${conflictCheck.startTime} رزرو شده است!`;
+            warn.innerHTML=`⛔ <b>تداخل رزرو:</b> این دستگاه توسط <b>${esc(conflictCheck.customerName)}</b> برای ${esc(conflictCheck.date)} ساعت ${esc(conflictCheck.startTime)} رزرو شده است!`;
         }
         updateTimeDisplay();
         updateTimerStatusText();
     }
 
     function updateTimeDisplay() {
-        if (currentTimeClient === null) return;
-        const c = clients[currentTimeClient];
+        const c = currentClient();
+        if (!c) return;
         document.getElementById('timeDisplay').textContent = formatTime(c.elapsed || 0);
         // countdown
         let cd=document.getElementById('countdownDisplay');
@@ -1140,8 +1232,8 @@
     }
 
     function updateTimerStatusText(){
-        if(currentTimeClient===null) return;
-        let c=clients[currentTimeClient];
+        let c=currentClient();
+        if(!c) return;
         let el=document.getElementById('timerStatusText');
         if(!el) return;
         if(c.timerDuration && c.timerDuration>0){
@@ -1154,9 +1246,12 @@
     }
 
     function setTimerPreset(mins){
-        if(currentTimeClient===null) return;
-        clients[currentTimeClient].timerDuration = mins;
-        clients[currentTimeClient].notified=false;
+        let c=currentClient();
+        if(!c) return;
+        c.timerDuration = mins;
+        c.notified=false;
+        c.warned300=false;
+        c.warned60=false;
         saveData();
         updateTimeDisplay();
         updateTimerStatusText();
@@ -1171,8 +1266,8 @@
     }
 
     function startTimer() {
-        if (currentTimeClient === null) return;
-        const c = clients[currentTimeClient];
+        const c = currentClient();
+        if (!c) return;
         // check reservation conflict before starting
         let conflict=checkStartConflict(c.id);
         if(conflict){
@@ -1185,6 +1280,8 @@
         c.status = 'online';
         c.startTime = Date.now() - (c.elapsed || 0) * 1000;
         c.notified=false;
+        c.warned300=false;
+        c.warned60=false;
         saveData();
         renderClients();
         updateStats();
@@ -1192,8 +1289,8 @@
     }
 
     function pauseTimer() {
-        if (currentTimeClient === null) return;
-        const c = clients[currentTimeClient];
+        const c = currentClient();
+        if (!c) return;
         if (c.status !== 'online') return;
 
         c.status = 'paused';
@@ -1206,24 +1303,29 @@
     }
 
     function stopTimer() {
-        if (currentTimeClient === null) return;
-        const c = clients[currentTimeClient];
+        const c = currentClient();
+        if (!c) return;
 
         if (c.status === 'online') {
             c.elapsed = Math.floor((Date.now() - c.startTime) / 1000);
         }
 
         const cost = calculateCost(c);
-        sessions.push({
+        const hours = (c.elapsed||0) / 3600;
+        const extraCost = Math.round((c.extra||0) * tariffs.extra * hours);
+        const session = {
+            id: uniqueSessionId(),
             clientId: c.id,
             clientName: c.name,
             duration: c.elapsed,
             cost,
+            extraCost,
             tariff: c.tariff,
             extra: c.extra,
             date: new Date().toISOString(),
             timerDuration: c.timerDuration||0
-        });
+        };
+        sessions.push(session);
 
         // offer PDF/share after stop
         let stoppedName=c.name; let stoppedCost=cost; let stoppedDur=c.elapsed;
@@ -1240,20 +1342,19 @@
         updateStats();
         updateIncome();
         showToast(`سشن ${stoppedName} پایان یافت - ${stoppedCost.toLocaleString()} تومان`,'success');
-        // auto open share modal for this session
-        setTimeout(()=>{
-            let idx=sessions.length-1;
-            openShareModalForSession(idx);
-        },600);
+        // auto open share modal for this session (با id، بدون ریسک ایندکس اشتباه)
+        setTimeout(()=>{ openShareModalForSession(session.id); },600);
     }
 
     function resetTimer() {
-        if (currentTimeClient === null) return;
-        const c = clients[currentTimeClient];
+        const c = currentClient();
+        if (!c) return;
         c.elapsed = 0;
         c.startTime = null;
         c.status = 'offline';
         c.notified=false;
+        c.warned300=false;
+        c.warned60=false;
         saveData();
         updateTimeDisplay();
         renderClients();
@@ -1262,62 +1363,104 @@
     }
 
     function addTime() {
-        if (currentTimeClient === null) return;
-        const mins = parseInt(document.getElementById('timeAdjust').value) || 0;
-        clients[currentTimeClient].elapsed = (clients[currentTimeClient].elapsed || 0) + mins * 60;
+        const c = currentClient();
+        if (!c) return;
+        const mins = parseInt(document.getElementById('timeAdjust').value);
+        if (isNaN(mins) || mins === 0) { showToast('زمان معتبر وارد کنید','error'); return; }
+        if (mins < 0) { subTime(-mins); return; }
+        if (c.status === 'online' && c.startTime) {
+            // حین فعالیت: زمان شروع جابه‌جا می‌شود تا محاسبه لحظه‌ای از بین نرود
+            c.startTime -= mins * 60 * 1000;
+        } else {
+            c.elapsed = Math.max(0, (c.elapsed || 0) + mins * 60);
+        }
         saveData();
         updateTimeDisplay();
         renderClients();
     }
 
-    function subTime() {
-        if (currentTimeClient === null) return;
-        const mins = parseInt(document.getElementById('timeAdjust').value) || 0;
-        clients[currentTimeClient].elapsed = Math.max(0, (clients[currentTimeClient].elapsed || 0) - mins * 60);
+    function subTime(negativeMins) {
+        const c = currentClient();
+        if (!c) return;
+        const mins = negativeMins !== undefined ? negativeMins
+            : parseInt(document.getElementById('timeAdjust').value);
+        if (isNaN(mins) || mins === 0) { showToast('زمان معتبر وارد کنید','error'); return; }
+        if (mins < 0) { addTime(-mins); return; }
+        if (c.status === 'online' && c.startTime) {
+            c.startTime += mins * 60 * 1000;
+            // جلوگیری از زمان منفی
+            if ((Date.now() - c.startTime) < 0) c.startTime = Date.now();
+        } else {
+            c.elapsed = Math.max(0, (c.elapsed || 0) - mins * 60);
+        }
         saveData();
         updateTimeDisplay();
         renderClients();
     }
 
     function updateTimers() {
-        let changed = false;
         let now=Date.now();
         clients.forEach((c, idx) => {
             if (c.status === 'online' && c.startTime) {
                 c.elapsed = Math.floor((now - c.startTime) / 1000);
-                changed = true;
-                // check timer end
+                // check timer end (با فلگ‌ها تا در صورت throttle شدن تیک‌ها هشدار از دست نرود)
                 if(c.timerDuration && c.timerDuration>0 && !c.notified){
                     let remaining = c.timerDuration*60 - c.elapsed;
                     if(remaining<=0){
                         c.notified=true;
                         saveData();
                         triggerAlarm(idx);
-                    } else if(remaining===300){ // 5 min warning
+                    } else if(remaining<=300 && !c.warned300){ // 5 min warning
+                        c.warned300=true;
+                        saveData();
                         showToast(`⏰ ${c.name}: 5 دقیقه تا پایان`,'warning');
                         if('Notification' in window && Notification.permission==='granted'){
                             new Notification('هشدار زمان', {body: `${c.name}: 5 دقیقه باقی مانده`});
                         }
-                    } else if(remaining===60){
+                    } else if(remaining<=60 && !c.warned60){ // 1 min warning
+                        c.warned60=true;
+                        saveData();
                         showToast(`⏰ ${c.name}: 1 دقیقه تا پایان`,'warning');
                     }
                 }
             }
         });
-        if (changed) {
-            saveData();
-            if (document.getElementById('clients-section')?.style.display !== 'none') renderClients();
-            if (document.getElementById('dashboard-section')?.style.display !== 'none') renderActiveClients();
-        }
-        if (currentTimeClient !== null) updateTimeDisplay();
-        // update reservation badge periodically
-        if(changed && Math.floor(now/10000)%6===0) updateReservationBadge();
+        // به‌روزرسانی سبک DOM (بدون بازسازی کامل گرید هر ثانیه)
+        updateClientCardsLive();
+        if (currentTimeClientId !== null && currentClient()) updateTimeDisplay();
     }
 
-    function triggerAlarm(clientIdx){
-        alarmClientIndex=clientIdx;
-        let c=clients[clientIdx];
-        document.getElementById('timerEndText').innerHTML=`کلاینت <b>${c.name}</b> به زمان تعیین شده (${c.timerDuration} دقیقه) رسید.<br>زمان سپری شده: <b>${formatTime(c.elapsed)}</b><br>هزینه فعلی: <b>${calculateCost(c).toLocaleString()} تومان</b>`;
+    // به‌روزرسانی درجا زمان/هزینه/تایمر روی کارت‌های کلاینت‌های فعال
+    function updateClientCardsLive(){
+        clients.forEach(c=>{
+            if(c.status!=='online') return;
+            let rem = (c.timerDuration && c.timerDuration>0) ? Math.max(0, c.timerDuration*60 - (c.elapsed||0)) : null;
+            let cost = calculateCost(c);
+            let card=document.querySelector(`#clientsGrid .client-card[data-cid="${c.id}"]`);
+            if(card){
+                let el=card.querySelector('[data-elapsed]'); if(el) el.textContent=formatTime(c.elapsed||0);
+                let co=card.querySelector('[data-cost]'); if(co) co.textContent=cost.toLocaleString()+' تومان';
+                let rm=card.querySelector('[data-remaining]');
+                if(rm && rem!==null){
+                    rm.textContent='⏳ باقی‌مانده: '+formatTime(rem);
+                    let danger = rem<=300;
+                    rm.style.background = danger?'rgba(239,68,68,0.25)':'';
+                    rm.style.color = danger?'#fff':'';
+                }
+            }
+            let dcard=document.querySelector(`#activeClientsList [data-cid="${c.id}"]`);
+            if(dcard){
+                let el=dcard.querySelector('[data-elapsed]'); if(el) el.textContent=formatTime(c.elapsed||0);
+                let co=dcard.querySelector('[data-cost]'); if(co) co.textContent=cost.toLocaleString()+' تومان';
+            }
+        });
+    }
+
+    function triggerAlarm(clientId){
+        alarmClientId=clientId;
+        let c=getClient(clientId);
+        if(!c) return;
+        document.getElementById('timerEndText').innerHTML=`کلاینت <b>${esc(c.name)}</b> به زمان تعیین شده (${c.timerDuration} دقیقه) رسید.<br>زمان سپری شده: <b>${formatTime(c.elapsed)}</b><br>هزینه فعلی: <b>${calculateCost(c).toLocaleString()} تومان</b>`;
         document.getElementById('timerEndModal').classList.add('show');
         playAlarmSound();
         if(navigator.vibrate) navigator.vibrate([600,200,600,200,1000]);
@@ -1329,11 +1472,11 @@
     function dismissAlarm(){
         document.getElementById('timerEndModal').classList.remove('show');
         stopAlarmSound();
-        alarmClientIndex=null;
+        alarmClientId=null;
     }
     function extendTimerEnd(mins){
-        if(alarmClientIndex===null) return;
-        let c=clients[alarmClientIndex];
+        let c = alarmClientId===null ? null : getClient(alarmClientId);
+        if(!c) return;
         c.timerDuration = (c.timerDuration||0)+mins;
         c.notified=false;
         saveData();
@@ -1342,8 +1485,8 @@
         showToast(`⏱️ ${mins} دقیقه اضافه شد - تایمر جدید: ${c.timerDuration} دقیقه`,'success');
     }
     function stopTimerFromAlarm(){
-        if(alarmClientIndex===null) return;
-        currentTimeClient=alarmClientIndex;
+        if(alarmClientId===null) return;
+        currentTimeClientId=alarmClientId;
         dismissAlarm();
         stopTimer();
     }
@@ -1361,7 +1504,6 @@
             let interval=setInterval(()=>{
                 osc.frequency.value = osc.frequency.value===880? 1200:880;
             },300);
-            alarmInterval=setInterval(()=>{},0); // placeholder
             // store for stop
             window._alarmCtx=ctx; window._alarmOsc=osc; window._alarmInt=interval;
             // auto stop after 15s
@@ -1378,7 +1520,19 @@
     }
 
     // ========== Reservation System ==========
-    function saveReservations(){ localStorage.setItem('alvand_reservations', JSON.stringify(reservations)); }
+    function saveReservations(){ saveJSON('alvand_reservations', reservations); }
+    // رزروهای pending که زمانشان گذشته، منقضی علامت می‌خورند (یک‌بار در شروع)
+    function expirePendingReservations(){
+        let changed=false;
+        let now=new Date();
+        reservations.forEach(r=>{
+            if(r.status!=='pending') return;
+            let end=new Date(new Date(r.date+'T'+r.startTime).getTime()+ (r.duration||0)*60000);
+            if(end<now){ r.status='expired'; changed=true; }
+        });
+        if(changed) saveReservations();
+        return changed;
+    }
     function updateReservationBadge(){
         let upcoming=reservations.filter(r=> isReservationActiveOrUpcoming(r)).length;
         let badge=document.getElementById('reservationBadge');
@@ -1388,6 +1542,7 @@
         }
     }
     function isReservationActiveOrUpcoming(r){
+        if(r.status==='cancelled'||r.status==='completed'||r.status==='expired') return false;
         let now=new Date();
         let start=new Date(r.date+'T'+r.startTime);
         let end=new Date(start.getTime()+ r.duration*60000);
@@ -1443,14 +1598,14 @@
         });
     }
 
-    function openReservationModal(prefillClientIdx=null){
+    function openReservationModal(prefillClientId=null){
+        if(clients.length===0){ showToast('ابتدا کلاینت اضافه کنید','error'); return; }
         // populate clients dropdown
         let sel=document.getElementById('resClientId');
-        sel.innerHTML = clients.map(c=> `<option value="${c.id}">${c.name}</option>`).join('');
-        if(clients.length===0){ showToast('ابتدا کلاینت اضافه کنید','error'); return; }
-        if(prefillClientIdx!==null && clients[prefillClientIdx]) sel.value=clients[prefillClientIdx].id;
+        sel.innerHTML = clients.map(c=> `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+        if(prefillClientId!==null && clients.find(c=>c.id===prefillClientId)) sel.value=prefillClientId;
         // reset fields if new
-        if(prefillClientIdx!==null || !document.getElementById('reservationId').value){
+        if(prefillClientId!==null || !document.getElementById('reservationId').value){
             document.getElementById('reservationId').value='';
             document.getElementById('resCustomerName').value='';
             document.getElementById('resPhone').value='';
@@ -1482,7 +1637,7 @@
         let warn=document.getElementById('reservationConflictWarning');
         if(conflict){
             warn.style.display='block';
-            warn.innerHTML=`⛔ تداخل: این دستگاه قبلاً برای <b>${conflict.customerName}</b> در ${conflict.date} ساعت ${conflict.startTime} به مدت ${conflict.duration} دقیقه رزرو شده است.`;
+            warn.innerHTML=`⛔ تداخل: این دستگاه قبلاً برای <b>${esc(conflict.customerName)}</b> در ${esc(conflict.date)} ساعت ${esc(conflict.startTime)} به مدت ${conflict.duration} دقیقه رزرو شده است.`;
         } else warn.style.display='none';
     }
     function saveReservation(){
@@ -1509,11 +1664,12 @@
         let client=clients.find(c=>c.id===clientId);
         if(idVal){
             let r=reservations.find(x=>x.id===parseInt(idVal));
+            if(!r){ showToast('رزرو مورد نظر یافت نشد','error'); return; }
             Object.assign(r,{clientId, clientName:client?client.name:'', customerName, phone, email, telegram, rubika, date, startTime, duration, notes});
             showToast('رزرو بروزرسانی شد','success');
         } else {
             reservations.push({
-                id: Date.now(),
+                id: uniqueReservationId(),
                 clientId,
                 clientName: client?client.name:'',
                 customerName, phone, email, telegram, rubika, date, startTime, duration, notes,
@@ -1535,7 +1691,7 @@
         document.getElementById('reservationId').value=r.id;
         // populate dropdown
         let sel=document.getElementById('resClientId');
-        sel.innerHTML = clients.map(c=> `<option value="${c.id}" ${c.id===r.clientId?'selected':''}>${c.name}</option>`).join('');
+        sel.innerHTML = clients.map(c=> `<option value="${c.id}" ${c.id===r.clientId?'selected':''}>${esc(c.name)}</option>`).join('');
         document.getElementById('resCustomerName').value=r.customerName;
         document.getElementById('resPhone').value=r.phone||'';
         document.getElementById('resEmail').value=r.email||'';
@@ -1559,7 +1715,7 @@
     }
     function completeReservation(id){
         let r=reservations.find(x=>x.id===id);
-        if(r){ r.status='completed'; saveReservations(); renderReservations(); showToast('رزرو تکمیل شد','success'); }
+        if(r){ r.status='completed'; saveReservations(); renderReservations(); renderClients(); updateReservationBadge(); renderCustomers(); showToast('رزرو تکمیل شد','success'); }
     }
     function renderReservations(filter='all'){
         if(filter) currentFilter=filter;
@@ -1575,11 +1731,11 @@
             }
         });
         let now=new Date();
-        let todayStr=now.toISOString().slice(0,10);
+        let todayStr=localDateStr(now);
         let filtered=[...reservations].sort((a,b)=> new Date(a.date+'T'+a.startTime)-new Date(b.date+'T'+b.startTime));
         if(filter==='today') filtered=filtered.filter(r=>r.date===todayStr);
         else if(filter==='upcoming') filtered=filtered.filter(r=> new Date(r.date+'T'+r.startTime) >= now);
-        else if(filter==='expired') filtered=filtered.filter(r=> { let end=new Date(new Date(r.date+'T'+r.startTime).getTime()+ r.duration*60000); return end < now; });
+        else if(filter==='expired') filtered=filtered.filter(r=> { if(r.status==='cancelled'||r.status==='completed') return false; let end=new Date(new Date(r.date+'T'+r.startTime).getTime()+ r.duration*60000); return end < now; });
 
         if(filtered.length===0){
             container.innerHTML=`<div class="glass" style="text-align:center; padding:50px; color:rgba(255,255,255,0.5);">هیچ رزروی یافت نشد</div>`;
@@ -1592,6 +1748,7 @@
             let status=''; let statusColor='#22c55e'; let statusText='آینده';
             if(r.status==='completed'){ statusText='تکمیل شده'; statusColor='#64748b'; }
             else if(r.status==='cancelled'){ statusText='لغو شده'; statusColor='#ef4444'; }
+            else if(r.status==='expired'){ statusText='منقضی'; statusColor='#f59e0b'; }
             else if(now2>=start && now2<=end){ statusText='🔴 در حال استفاده'; statusColor='#ef4444'; }
             else if(end < now2){ statusText='منقضی'; statusColor='#f59e0b'; }
             else if(start>now2){ statusText='⏳ آینده'; statusColor='#22c55e'; }
@@ -1599,10 +1756,10 @@
             return `<div class="glass" style="padding:20px; border-right:4px solid ${statusColor}; ${isActive?'background:rgba(239,68,68,0.08);':''}">
                 <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:10px;">
                     <div>
-                        <h3 style="font-weight:800; margin-bottom:6px;">${r.clientName} <span style="font-weight:400; color:rgba(255,255,255,0.5);"> - ${r.customerName}</span></h3>
-                        <p style="font-size:0.85rem; color:rgba(255,255,255,0.6);">📅 ${r.date} ⏰ ${r.startTime} - ${end.toTimeString().slice(0,5)} (${r.duration} دقیقه)</p>
-                        <p style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin-top:4px;">📞 ${r.phone||'-'} | ✈️ ${r.telegram||'-'} | 🔴 ${r.rubika||'-'} | 📧 ${r.email||'-'}</p>
-                        ${r.notes? `<p style="font-size:0.8rem; color:#fbbf24; margin-top:6px;">📝 ${r.notes}</p>`:''}
+                        <h3 style="font-weight:800; margin-bottom:6px;">${esc(r.clientName)} <span style="font-weight:400; color:rgba(255,255,255,0.5);"> - ${esc(r.customerName)}</span></h3>
+                        <p style="font-size:0.85rem; color:rgba(255,255,255,0.6);">📅 ${esc(r.date)} ⏰ ${esc(r.startTime)} - ${end.toTimeString().slice(0,5)} (${r.duration} دقیقه)</p>
+                        <p style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin-top:4px;">📞 ${esc(r.phone)||'-'} | ✈️ ${esc(r.telegram)||'-'} | 🔴 ${esc(r.rubika)||'-'} | 📧 ${esc(r.email)||'-'}</p>
+                        ${r.notes? `<p style="font-size:0.8rem; color:#fbbf24; margin-top:6px;">📝 ${esc(r.notes)}</p>`:''}
                     </div>
                     <span style="padding:6px 12px; border-radius:50px; background:${statusColor}22; color:${statusColor}; border:1px solid ${statusColor}44; font-size:0.75rem; font-weight:700;">${statusText}</span>
                 </div>
@@ -1627,10 +1784,6 @@
             if(!map.has(key)) map.set(key,{name:r.customerName, phone:r.phone, email:r.email, telegram:r.telegram, rubika:r.rubika, count:0, total:0});
             map.get(key).count++;
         });
-        sessions.forEach(s=>{
-            // sessions may not have customer info, skip
-        });
-        // also add from reservations
         let customers=[...map.values()];
         if(customers.length===0){
             container.innerHTML=`<p style="color:rgba(255,255,255,0.5); text-align:center; padding:20px;">هنوز مشتری ثبت نشده - با رزرو کردن مشتری اضافه میشود</p>`;
@@ -1639,11 +1792,11 @@
         container.innerHTML=`<div style="display:grid; gap:10px;">`+customers.map(c=>`
             <div class="glass" style="padding:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <div>
-                    <h4 style="font-weight:700;">${c.name}</h4>
-                    <p style="font-size:0.8rem; color:rgba(255,255,255,0.5);">📞 ${c.phone||'-'} | 📧 ${c.email||'-'} | ✈️ ${c.telegram||'-'} | 🔴 ${c.rubika||'-'}</p>
+                    <h4 style="font-weight:700;">${esc(c.name)}</h4>
+                    <p style="font-size:0.8rem; color:rgba(255,255,255,0.5);">📞 ${esc(c.phone)||'-'} | 📧 ${esc(c.email)||'-'} | ✈️ ${esc(c.telegram)||'-'} | 🔴 ${esc(c.rubika)||'-'}</p>
                     <p style="font-size:0.75rem; color:rgba(255,255,255,0.4);">${c.count} رزرو</p>
                 </div>
-                <button class="glass-btn" style="padding:8px 14px; font-size:0.8rem;" onclick="openShareModalForCustomer('${c.name.replace(/'/g,"\\'")}','${c.phone}','${c.email}')">📤 ارسال گزارش</button>
+                <button class="glass-btn" style="padding:8px 14px; font-size:0.8rem;" data-cname="${esc(c.name)}" data-cphone="${esc(c.phone||'')}" data-cemail="${esc(c.email||'')}">📤 ارسال گزارش</button>
             </div>
         `).join('')+`</div>`;
     }
@@ -1668,16 +1821,18 @@
 `+
 `Gamenet Manager Alvand`;
     }
-    function openShareModalForClient(idx){
-        let c=clients[idx];
+    function openShareModalForClient(clientId){
+        let c=clients.find(x=>x.id===clientId);
+        if(!c) return;
         let cost=calculateCost(c);
         let text=buildShareTextForClient(c, c.elapsed||0, cost);
-        openShareModal(c.name, text, {clientIdx:idx, cost, duration:c.elapsed||0});
+        let res=reservations.filter(r=>r.clientId===c.id).pop();
+        openShareModal(c.name, text, {phone: res? (res.phone||res.telegram||''):'', email: res? (res.email||''):''});
         // also prepare PDF html
         preparePdfForClient(c, cost);
     }
-    function openShareModalForSession(sessionIdx){
-        let s=sessions[sessionIdx];
+    function openShareModalForSession(sessionId){
+        let s=sessions.find(x=>x.id===sessionId);
         if(!s) return;
         let text=`🎮 گزارش گیم‌نت الوند
 `+
@@ -1692,7 +1847,7 @@
 `تاریخ: ${new Date(s.date).toLocaleString('fa-IR')}
 `+
 `Gamenet Manager Alvand`;
-        openShareModal(s.clientName, text, {sessionIdx});
+        openShareModal(s.clientName, text, {sessionId: s.id});
         preparePdfForSession(s);
     }
     function openShareModalForReservation(resId){
@@ -1711,7 +1866,7 @@
 `تماس: ${r.phone||'-'}
 `+
 `Gamenet Manager Alvand`;
-        openShareModal(r.customerName, text, {});
+        openShareModal(r.customerName, text, {phone:r.phone||r.telegram||'', email:r.email||''});
         preparePdfForReservation(r);
     }
     function openShareModalForCustomer(name, phone, email){
@@ -1724,41 +1879,47 @@
         document.getElementById('sharePhone').value=phone||'';
         document.getElementById('shareEmail').value=email||'';
         // prepare generic pdf
-        let html=`<h2 style="text-align:center; color:#4f46e5;">گزارش مشتری: ${name}</h2>
+        let html=`<h2 style="text-align:center; color:#4f46e5;">گزارش مشتری: ${esc(name)}</h2>
 `+
-`<p>تلفن: ${phone||'-'}</p><p>ایمیل: ${email||'-'}</p>
+`<p>تلفن: ${esc(phone)||'-'}</p><p>ایمیل: ${esc(email)||'-'}</p>
 `+
 `<p>تاریخ گزارش: ${new Date().toLocaleString('fa-IR')}</p>
 `+
 `<hr>
 `+
 `<p>این گزارش شامل خلاصه فعالیت شما در گیم‌نت میباشد.</p>`;
-        setPdfContent(html, `customer-${name}.pdf`);
+        setPdfContent(html, `customer-${safeName(name)}.pdf`);
     }
-    function openShareModal(title, text, meta){
+    function openShareModal(title, text, meta={}){
         document.getElementById('shareClientName').textContent=title;
         document.getElementById('shareSummary').textContent=text;
         currentShareText=text;
-        // try to fill phone/email from reservations if available
-        let r=reservations.find(x=>x.customerName===title);
-        if(r){
-            document.getElementById('sharePhone').value=r.phone||r.telegram||'';
-            document.getElementById('shareEmail').value=r.email||'';
+        // پر کردن تلفن/ایمیل: اول از meta (کسی که مودال را باز کرده)، وگرنه از آخرین رزرو مشتری
+        let phone = meta.phone, email = meta.email;
+        if(phone===undefined || email===undefined){
+            let r=reservations.filter(x=>x.customerName===title).pop();
+            if(r){
+                if(phone===undefined) phone=r.phone||r.telegram||'';
+                if(email===undefined) email=r.email||'';
+            }
         }
+        document.getElementById('sharePhone').value=phone||'';
+        document.getElementById('shareEmail').value=email||'';
         document.getElementById('shareModal').classList.add('show');
     }
     function setPdfContent(html, filename){
         document.getElementById('pdfContentInner').innerHTML=html;
         document.getElementById('pdfDate').textContent=new Date().toLocaleString('fa-IR');
+        let pv=document.getElementById('pdfVersion'); if(pv) pv.textContent='Alvand Gamenet Manager v'+APP_VERSION;
         currentPdfFilename=filename;
         // prepare blob async for share
         setTimeout(()=> generatePdfBlob(), 300);
     }
     function preparePdfForClient(c, cost){
         let html=`
-            <h2 style="color:#1e293b; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">گزارش کارکرد: ${c.name}</h2>
+            <h2 style="color:#1e293b; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">گزارش کارکرد: ${esc(c.name)}</h2>
             <table style="width:100%; border-collapse:collapse; margin:16px 0;">
-                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700; width:35%;">نام کلاینت</td><td style="padding:10px; border:1px solid #e2e8f0;">${c.name}</td></tr>
+                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700; width:35%;">نام کلاینت</td><td style="padding:10px; border:1px solid #e2e8f0;">${esc(c.name)}</td></tr>
                 <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">تعرفه</td><td style="padding:10px; border:1px solid #e2e8f0;">${c.tariff==='single'?'تک نفره':'دو نفره'} ${c.extra? `+${c.extra} نفر اضافه`:''}</td></tr>
                 <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">مدت فعلی</td><td style="padding:10px; border:1px solid #e2e8f0; direction:ltr; text-align:right;">${formatTime(c.elapsed||0)}</td></tr>
                 <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">هزینه</td><td style="padding:10px; border:1px solid #e2e8f0; color:#16a34a; font-weight:800;">${cost.toLocaleString()} تومان</td></tr>
@@ -1767,32 +1928,32 @@
             </table>
             <p style="color:#64748b; font-size:12px; margin-top:20px;">قیمت پایه: تک نفره ${tariffs.single.toLocaleString()} / دو نفره ${tariffs.double.toLocaleString()} / نفر اضافه ${tariffs.extra.toLocaleString()} تومان بر ساعت</p>
         `;
-        setPdfContent(html, `client-${c.name}-${Date.now()}.pdf`);
+        setPdfContent(html, `client-${safeName(c.name)}-${Date.now()}.pdf`);
     }
     function preparePdfForSession(s){
         let html=`
-            <h2 style="color:#1e293b; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">رسید سشن: ${s.clientName}</h2>
+            <h2 style="color:#1e293b; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">رسید سشن: ${esc(s.clientName)}</h2>
             <table style="width:100%; border-collapse:collapse; margin:16px 0;">
-                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">کلاینت</td><td style="padding:10px; border:1px solid #e2e8f0;">${s.clientName}</td></tr>
+                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">کلاینت</td><td style="padding:10px; border:1px solid #e2e8f0;">${esc(s.clientName)}</td></tr>
                 <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">مدت</td><td style="padding:10px; border:1px solid #e2e8f0; direction:ltr; text-align:right;">${formatTime(s.duration)}</td></tr>
                 <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">هزینه</td><td style="padding:10px; border:1px solid #e2e8f0; color:#16a34a; font-weight:800;">${s.cost.toLocaleString()} تومان</td></tr>
                 <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">تاریخ</td><td style="padding:10px; border:1px solid #e2e8f0;">${new Date(s.date).toLocaleString('fa-IR')}</td></tr>
             </table>
         `;
-        setPdfContent(html, `session-${s.clientName}-${Date.now()}.pdf`);
+        setPdfContent(html, `session-${safeName(s.clientName)}-${Date.now()}.pdf`);
     }
     function preparePdfForReservation(r){
         let html=`
-            <h2 style="color:#1e293b; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">برگ رزرو: ${r.clientName}</h2>
+            <h2 style="color:#1e293b; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">برگ رزرو: ${esc(r.clientName)}</h2>
             <table style="width:100%; border-collapse:collapse; margin:16px 0;">
-                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">کلاینت</td><td style="padding:10px; border:1px solid #e2e8f0;">${r.clientName}</td></tr>
-                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">مشتری</td><td style="padding:10px; border:1px solid #e2e8f0;">${r.customerName}</td></tr>
-                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">تاریخ و ساعت</td><td style="padding:10px; border:1px solid #e2e8f0;">${r.date} - ${r.startTime}</td></tr>
+                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">کلاینت</td><td style="padding:10px; border:1px solid #e2e8f0;">${esc(r.clientName)}</td></tr>
+                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">مشتری</td><td style="padding:10px; border:1px solid #e2e8f0;">${esc(r.customerName)}</td></tr>
+                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">تاریخ و ساعت</td><td style="padding:10px; border:1px solid #e2e8f0;">${esc(r.date)} - ${esc(r.startTime)}</td></tr>
                 <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">مدت</td><td style="padding:10px; border:1px solid #e2e8f0;">${r.duration} دقیقه</td></tr>
-                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">تماس</td><td style="padding:10px; border:1px solid #e2e8f0;">${r.phone||'-'}</td></tr>
+                <tr><td style="padding:10px; background:#f8fafc; border:1px solid #e2e8f0; font-weight:700;">تماس</td><td style="padding:10px; border:1px solid #e2e8f0;">${esc(r.phone)||'-'}</td></tr>
             </table>
         `;
-        setPdfContent(html, `reservation-${r.customerName}-${Date.now()}.pdf`);
+        setPdfContent(html, `reservation-${safeName(r.customerName)}-${Date.now()}.pdf`);
     }
     async function generatePdfBlob(){
         try{
@@ -1868,14 +2029,16 @@
         }
     }
 
-    function generatePdfForClient(idx){
-        let c=clients[idx];
+    function generatePdfForClient(clientId){
+        let c=clients.find(x=>x.id===clientId);
+        if(!c) return;
         let cost=calculateCost(c);
         preparePdfForClient(c,cost);
         setTimeout(()=>downloadCurrentPdf(),700);
     }
-    function generatePdfForSession(idx){
-        let s=sessions[idx];
+    function generatePdfForSession(sessionId){
+        let s=sessions.find(x=>x.id===sessionId);
+        if(!s) return;
         preparePdfForSession(s);
         setTimeout(()=>downloadCurrentPdf(),700);
     }
@@ -1891,7 +2054,7 @@
         <p style="text-align:center; color:#64748b;">تعداد سشن: ${filtered.length} | جمع درآمد: ${total.toLocaleString()} تومان</p>
         <table style="width:100%; border-collapse:collapse; margin-top:16px; font-size:12px;">
         <thead><tr style="background:#4f46e5; color:white;"><th style="padding:8px; border:1px solid #ddd;">کلاینت</th><th style="padding:8px; border:1px solid #ddd;">مدت</th><th style="padding:8px; border:1px solid #ddd;">هزینه</th><th style="padding:8px; border:1px solid #ddd;">تاریخ</th></tr></thead><tbody>
-        `+filtered.map(s=>`<tr><td style="padding:6px; border:1px solid #e2e8f0;">${s.clientName}</td><td style="padding:6px; border:1px solid #e2e8f0; direction:ltr;">${formatTime(s.duration)}</td><td style="padding:6px; border:1px solid #e2e8f0;">${s.cost.toLocaleString()}</td><td style="padding:6px; border:1px solid #e2e8f0; font-size:10px;">${new Date(s.date).toLocaleString('fa-IR')}</td></tr>`).join('')+`</tbody></table>`;
+        `+filtered.map(s=>`<tr><td style="padding:6px; border:1px solid #e2e8f0;">${esc(s.clientName)}</td><td style="padding:6px; border:1px solid #e2e8f0; direction:ltr;">${formatTime(s.duration)}</td><td style="padding:6px; border:1px solid #e2e8f0;">${s.cost.toLocaleString()}</td><td style="padding:6px; border:1px solid #e2e8f0; font-size:10px;">${new Date(s.date).toLocaleString('fa-IR')}</td></tr>`).join('')+`</tbody></table>`;
         setPdfContent(html, `report-${type}-${Date.now()}.pdf`);
         setTimeout(()=>downloadCurrentPdf(),800);
     }
@@ -1904,8 +2067,14 @@
     }
 
     function updateTariff(type, value) {
-        tariffs[type] = parseInt(value) || 0;
-        localStorage.setItem('alvand_tariffs', JSON.stringify(tariffs));
+        let n = parseInt(value);
+        if (isNaN(n) || n <= 0) {
+            showToast('تعرفه باید عددی بزرگ‌تر از صفر باشد','error');
+            loadTariffs();
+            return;
+        }
+        tariffs[type] = n;
+        saveJSON('alvand_tariffs', tariffs);
         showToast('تعرفه بروز شد','success');
     }
 
@@ -1955,15 +2124,15 @@
                 remaining=`<p style="color:${rem<=300?'#fca5a5':'#fbbf24'}; font-size:0.8rem;">⏳ باقی‌مانده: ${formatTime(rem)}</p>`;
             }
             return `
-            <div class="glass" style="padding: 20px; display: flex; align-items: center; justify-content: space-between;">
+            <div class="glass" style="padding: 20px; display: flex; align-items: center; justify-content: space-between;" data-cid="${c.id}">
                 <div>
-                    <h4 style="font-weight: 700; margin-bottom: 4px;">${c.name}</h4>
+                    <h4 style="font-weight: 700; margin-bottom: 4px;">${esc(c.name)}</h4>
                     <span class="tariff-badge ${c.tariff === 'single' ? 'tariff-single' : 'tariff-double'}">${c.tariff === 'single' ? 'تک نفره' : 'دو نفره'}</span>
                     ${remaining}
                 </div>
                 <div style="text-align: left;">
-                    <p style="font-size: 1.4rem; font-weight: 900; font-variant-numeric: tabular-nums; color: ${c.timerDuration && (c.timerDuration*60 - c.elapsed)<=300?'#ef4444':'#22c55e'};">${formatTime(c.elapsed || 0)}</p>
-                    <p style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">${calculateCost(c).toLocaleString()} تومان</p>
+                    <p style="font-size: 1.4rem; font-weight: 900; font-variant-numeric: tabular-nums; color: ${c.timerDuration && (c.timerDuration*60 - c.elapsed)<=300?'#ef4444':'#22c55e'};" data-elapsed>${formatTime(c.elapsed || 0)}</p>
+                    <p style="font-size: 0.8rem; color: rgba(255,255,255,0.5);" data-cost>${calculateCost(c).toLocaleString()} تومان</p>
                 </div>
             </div>
         `}).join('');
@@ -2035,17 +2204,17 @@
         } else {
             // need reverse copy
             [...filtered].reverse().forEach((s, idx) => {
-                let origIdx=sessions.indexOf(s);
+                let sid=s.id ? String(s.id) : sessions.indexOf(s);
                 html += `
                     <tr class="report-row">
-                        <td style="padding: 12px;">${s.clientName}</td>
+                        <td style="padding: 12px;">${esc(s.clientName)}</td>
                         <td style="padding: 12px;"><span class="tariff-badge ${s.tariff === 'single' ? 'tariff-single' : 'tariff-double'}">${s.tariff === 'single' ? 'تک نفره' : 'دو نفره'}</span></td>
                         <td style="padding: 12px;">${formatTime(s.duration)}</td>
                         <td style="padding: 12px; font-weight: 700; color: #22c55e;">${s.cost.toLocaleString()}</td>
                         <td style="padding: 12px; color: rgba(255,255,255,0.6); font-size: 0.85rem;">${new Date(s.date).toLocaleString('fa-IR')}</td>
                         <td style="padding: 12px; text-align:center;">
-                            <button class="glass-btn" style="padding:6px 10px; font-size:0.75rem;" onclick="generatePdfForSession(${origIdx})">PDF</button>
-                            <button class="glass-btn" style="padding:6px 10px; font-size:0.75rem;" onclick="openShareModalForSession(${origIdx})">📤</button>
+                            <button class="glass-btn" style="padding:6px 10px; font-size:0.75rem;" onclick="generatePdfForSession('${sid}')">PDF</button>
+                            <button class="glass-btn" style="padding:6px 10px; font-size:0.75rem;" onclick="openShareModalForSession('${sid}')">📤</button>
                         </td>
                     </tr>
                 `;
@@ -2055,11 +2224,6 @@
         html += '</tbody></table></div>';
 
         document.getElementById('reportContent').innerHTML = html;
-        // also prepare pdf for this report
-        let reportHtmlTitle=title;
-        // set pdf content for later download
-        let pdfHtml=`<h2 style="text-align:center; color:#4f46e5;">${reportHtmlTitle}</h2><p style="text-align:center;">${filtered.length} سشن - ${totalCost.toLocaleString()} تومان</p>`;
-        // we don't auto set here, generatePdfForReport will do
     }
 
     // Income
@@ -2081,9 +2245,15 @@
         // Breakdown
         const byTariff = { single: 0, double: 0, extra: 0 };
         sessions.forEach(s => {
-            if (s.tariff === 'single') byTariff.single += s.cost;
-            else byTariff.double += s.cost;
-            byTariff.extra += (s.extra || 0) * tariffs.extra * (s.duration / 3600);
+            // سهم نفرات اضافه از هزینه سشن جدا می‌شود تا دوبار شمرده نشود
+            // (اگر در زمان ثبت ذخیره شده باشد از همان استفاده می‌کنیم؛ وگرنه با تعرفه فعلی تخمین)
+            let extraCost = (s.extraCost !== undefined && s.extraCost !== null)
+                ? s.extraCost
+                : Math.round((s.extra || 0) * tariffs.extra * (s.duration / 3600));
+            let baseCost = Math.max(0, s.cost - extraCost);
+            if (s.tariff === 'single') byTariff.single += baseCost;
+            else byTariff.double += baseCost;
+            byTariff.extra += extraCost;
         });
 
         let br=document.getElementById('incomeBreakdown');
@@ -2110,10 +2280,12 @@
         const now = new Date();
         const data = [];
 
+        let labels=[];
         for (let i = 6; i >= 0; i--) {
             const d = new Date(now - i * 24 * 60 * 60 * 1000);
             const income = sessions.filter(s => new Date(s.date).toDateString() === d.toDateString()).reduce((sum, s) => sum + s.cost, 0);
             data.push(income);
+            labels.push(d.toLocaleDateString('fa-IR', { weekday: 'short' }));
         }
 
         const max = Math.max(...data, 1);
@@ -2125,9 +2297,19 @@
                 <div class="chart-bar" style="width: 100%; height: ${(val/max)*160}px; max-width: 40px;"></div>
             </div>
         `).join('');
+        let lbl=document.getElementById('weeklyChartLabels');
+        if(lbl) lbl.innerHTML = labels.map(l=>`<span style="flex:1; text-align:center;">${l}</span>`).join('');
     }
 
     // Utilities
+    // تاریخ محلی به شکل YYYY-MM-DD (به‌جای toISOString که UTC است)
+    function localDateStr(d){
+        d=d||new Date();
+        let m=(d.getMonth()+1).toString().padStart(2,'0');
+        let day=d.getDate().toString().padStart(2,'0');
+        return d.getFullYear()+'-'+m+'-'+day;
+    }
+
     function formatTime(seconds) {
         seconds=Math.max(0, Math.floor(seconds));
         const h = Math.floor(seconds / 3600);
@@ -2137,8 +2319,13 @@
     }
 
     function saveData() {
-        localStorage.setItem('alvand_clients', JSON.stringify(clients));
-        localStorage.setItem('alvand_sessions', JSON.stringify(sessions));
+        // جلوگیری از پر شدن حافظه: حداکثر ۵۰۰۰ سشن آخر
+        if (sessions.length > 5000) {
+            sessions = sessions.slice(-5000);
+            showToast('سشن‌های خیلی قدیمی حذف شدند - پشتیبان بگیرید', 'warning');
+        }
+        saveJSON('alvand_clients', clients);
+        saveJSON('alvand_sessions', sessions);
     }
 
     // Init
@@ -2193,6 +2380,86 @@
             if(e.target===el) el.classList.remove('show');
         });
     });
+
+    // بستن مودال بازِ آخر با Escape
+    document.addEventListener('keydown', (e)=>{
+        if(e.key!=='Escape') return;
+        let open=[...document.querySelectorAll('.modal-overlay.show')].pop();
+        if(open) closeModal(open.id);
+    });
+
+    // دسترس‌پذیری: آیتم‌های منو مثل دکمه عمل کنند (کیبورد + role)
+    document.querySelectorAll('.nav-item').forEach(n=>{
+        n.setAttribute('role','button');
+        n.setAttribute('tabindex','0');
+        n.addEventListener('keydown', (e)=>{
+            if(e.key==='Enter'||e.key===' '){ e.preventDefault(); n.click(); }
+        });
+    });
+
+    // ارسال گزارش مشتری بدون تزریق داده در onclick (delegated)
+    let customersContainer=document.getElementById('customersList');
+    if(customersContainer){
+        customersContainer.addEventListener('click', (e)=>{
+            let btn=e.target.closest('button[data-cname]');
+            if(!btn) return;
+            openShareModalForCustomer(btn.dataset.cname, btn.dataset.cphone, btn.dataset.cemail);
+        });
+    }
+
+    // ========== Backup / Restore ==========
+    function exportBackup(){
+        let data={ app:'gamenet-manager-alvand', version:APP_VERSION, exportedAt:new Date().toISOString(), clients, tariffs, sessions, reservations };
+        let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+        let fname='gamenet-backup-'+localDateStr()+'.json';
+        let finishDownload=()=>{
+            let a=document.createElement('a');
+            a.href=URL.createObjectURL(blob);
+            a.download=fname;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(a.href);
+            showToast('فایل پشتیبان دانلود شد','success');
+        };
+        // در WebView اندروید دانلود blob ممکن است بی‌صدا شکست بخورد؛ اگر اشتراک فایل موجود است از آن استفاده کن
+        let file=null;
+        try{ file=new File([blob], fname, {type:'application/json'}); }catch(e){}
+        if(file && navigator.canShare && navigator.canShare({files:[file]})){
+            navigator.share({files:[file], title:'پشتیبان گیم‌نت'}).then(()=>{
+                showToast('فایل پشتیبان آماده ارسال شد','success');
+            }).catch(err=>{
+                if(err && err.name==='AbortError') return;
+                finishDownload();
+            });
+        } else {
+            finishDownload();
+        }
+    }
+    function importBackup(ev){
+        let file=ev.target.files && ev.target.files[0];
+        if(!file) return;
+        let reader=new FileReader();
+        reader.onload=()=>{
+            try{
+                let data=JSON.parse(reader.result);
+                if(!Array.isArray(data.clients)||!Array.isArray(data.sessions)||!Array.isArray(data.reservations||[])) throw new Error('bad backup');
+                if(data.tariffs && typeof data.tariffs!=='object') throw new Error('bad tariffs');
+                if(!confirm('همه داده‌های فعلی با فایل پشتیبان جایگزین شود؟')) return;
+                saveJSON('alvand_clients', data.clients);
+                saveJSON('alvand_sessions', data.sessions);
+                saveJSON('alvand_tariffs', data.tariffs||{single:15000,double:25000,extra:8000});
+                saveJSON('alvand_reservations', data.reservations||[]);
+                showToast('بازیابی انجام شد - صفحه بازنشانی می‌شود','success');
+                setTimeout(()=>location.reload(),800);
+            }catch(e){
+                console.error(e);
+                showToast('فایل پشتیبان معتبر نیست','error');
+            }
+        };
+        reader.readAsText(file);
+        ev.target.value='';
+    }
 
 </script>
 </body>
