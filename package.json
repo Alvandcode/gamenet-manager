@@ -3,9 +3,21 @@
   "displayName": "Gamenet Manager Alvand",
   "version": "1.1.0",
   "description": "مدیریت گیم‌نت الوند - با رزرو، تایمر هشدار، PDF و اشتراک‌گذاری",
-  "main": "index.js",
-  "scripts": {},
-  "keywords": ["cordova", "android"],
-  "author": "Alvand",
-  "license": "SEE LICENSE IN LICENSE"
+  "scripts": {
+    "build": "cordova build android",
+    "run": "cordova run android",
+    "start": "npx --yes http-server www -p 8080 -c-1",
+    "check": "node tools/check.js"
+  },
+  "keywords": [
+    "cordova",
+    "android"
+  ],
+  "author": "Alvandcode",
+  "license": "SEE LICENSE IN LICENSE",
+  "devDependencies": {
+    "cordova": "^12.0.0",
+    "html2pdf.js": "^0.14.0",
+    "vazirmatn": "33.0.3"
+  }
 }

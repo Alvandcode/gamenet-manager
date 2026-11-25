@@ -5,15 +5,25 @@
     
     <name>Gamenet Manager Alvand</name>
     <description>مدیریت گیم‌نت الوند</description>
-    <author email="you@example.com" href="#">Alvand</author>
+    <author href="https://github.com/Alvandcode">Alvandcode</author>
     
     <content src="index.html" />
-    <access origin="*" />
-    <allow-intent href="http://*/*" />
+
+    <engine name="android" spec="^13.0.0" />
+    
+    <!-- دسترسی شبکه فقط برای لینک‌های اشتراک‌گذاری؛ همه asset ها آفلاین داخل برنامه‌اند -->
     <allow-intent href="https://*/*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="tg:*" />
+    <allow-intent href="whatsapp:*" />
+    <allow-intent href="rubika:*" />
     
     <preference name="Orientation" value="default" />
-    <preference name="BackgroundColor" value="#FF0F0C29" />
+    <preference name="BackgroundColor" value="0xFF0F0C29" />
     <preference name="Fullscreen" value="false" />
+    
+    <platform name="android">
+        <preference name="AndroidXEnabled" value="true" />
+    </platform>
     
 </widget>
