@@ -491,6 +491,12 @@
                 <div class="nav-item" onclick="showSection('backup', this)">
                     <span style="font-size: 1.3rem;">&#128190;</span> پشتیبان‌گیری
                 </div>
+                <div class="nav-item" onclick="showSection('about', this)">
+                    <span style="font-size: 1.3rem;">&#8505;&#65039;</span> درباره برنامه
+                </div>
+                <div class="nav-item" onclick="showSection('contact', this)">
+                    <span style="font-size: 1.3rem;">&#128222;</span> تماس با سازنده
+                </div>
             </nav>
 
             <div style="padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
@@ -670,6 +676,81 @@
                     <button class="glass-btn" onclick="document.getElementById('backupFileInput').click()">&#11014; بازیابی از فایل پشتیبان</button>
                     <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none" onchange="importBackup(event)">
                 </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about-section" class="section" style="display: none;">
+            <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 24px;">&#8505;&#65039; درباره برنامه</h1>
+
+            <div class="glass" style="padding: 24px; margin-bottom: 20px;">
+                <h2 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 12px;">&#127918; این برنامه چیست؟</h2>
+                <p style="color: rgba(255,255,255,0.7); line-height: 2;">
+                    <strong>مدیریت گیم‌نت الوند (نسخه رایگان)</strong> یک برنامه سبک برای مدیران گیم‌نت‌های کوچک است که کارهای روزمره گیم‌نت را ساده و منظم می‌کند. تمام داده‌ها فقط روی همین دستگاه ذخیره می‌شوند و برنامه کاملاً آفلاین کار می‌کند؛ هیچ نیاز به اینترنت، ثبت‌نام یا سرور ندارید.
+                </p>
+                <ul style="color: rgba(255,255,255,0.7); line-height: 2.2; margin-top: 12px; padding-right: 20px;">
+                    <li>&#128421;&#65039; <strong>مدیریت کلاینت‌ها و تایمر:</strong> افزودن سیستم‌ها، شروع/توقف تایمر با یادآوری هشدار زمان، محاسبه خودکار هزینه</li>
+                    <li>&#128142; <strong>تعرفه‌ها:</strong> تعرفه تک‌نفره/دو‌نفره و هزینه نفرات اضافه — قابل تغییر در هر لحظه</li>
+                    <li>&#128197; <strong>رزروها:</strong> ثبت رزرو مشتریان با یادآوری برای رزروهای امروز و فردا</li>
+                    <li>&#128200; <strong>گزارش‌ها:</strong> گزارش روزانه، هفتگی و ماهانه به‌همراه breakdown درآمد</li>
+                    <li>&#128196; <strong>PDF و ارسال:</strong> تبدیل گزارش به PDF و اشتراک‌گذاری با مشتری یا ذخیره</li>
+                    <li>&#128190; <strong>پشتیبان‌گیری:</strong> ذخیره و بازیابی کامل داده‌ها با یک فایل JSON</li>
+                </ul>
+            </div>
+
+            <div class="glass" style="padding: 24px; border: 1px solid rgba(129,140,248,0.4);">
+                <h2 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 12px;">&#128161; نسخه حرفه‌ای چیست؟</h2>
+                <p style="color: rgba(255,255,255,0.7); line-height: 2;">
+                    این برنامه، <strong>نسخه کوچک و بدون امکانات</strong> از <strong>نسخه حرفه‌ای مدیریت گیم‌نت الوند</strong> است. نسخه حرفه‌ای علاوه بر همه امکانات این نسخه، قابلیت‌های پیشرفته‌تری مانند مدیریت چند دستگاه در شبکه، پنل آنلاین، مدیریت اعتبار مشتریان، گزارش‌های اختصاصی و پشتیبانی مستقیم دارد.
+                </p>
+                <p style="color: rgba(255,255,255,0.85); line-height: 2; margin-top: 8px;">
+                    برای استفاده از نسخه حرفه‌ای باید <strong>لایسنس خریداری کنید</strong>. برای اطلاعات قیمت و نحوه خرید، از صفحه «تماس با سازنده» در همین منو پیگیری کنید.
+                </p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top: 16px;">
+                    <button class="glass-btn" onclick="showSectionByName('contact')">&#128222; تماس با سازنده</button>
+                </div>
+            </div>
+
+            <p style="text-align:center; color: rgba(255,255,255,0.4); font-size: 0.8rem; margin-top: 24px;">
+                نسخه <span id="aboutVersion">1.1.0</span> &#8226; ساخت Alvand Code &#8226; داده‌های شما فقط روی دستگاه خودتان ذخیره می‌شود
+            </p>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact-section" class="section" style="display: none;">
+            <h1 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 24px;">&#128222; تماس با سازنده</h1>
+
+            <div class="glass" style="padding: 24px; margin-bottom: 20px;">
+                <p style="color: rgba(255,255,255,0.7); line-height: 2; margin-bottom: 16px;">
+                    برای خرید لایسنس نسخه حرفه‌ای، گزارش مشکل، پیشنهاد امکانات یا سؤال درباره برنامه، از راه‌های زیر در ارتباط باشید:
+                </p>
+                <div style="display:grid; gap:16px;">
+                    <a href="https://t.me/a_c_official" target="_blank" rel="noopener"
+                       style="display:flex; align-items:center; gap:16px; padding:16px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.4); border-radius:var(--radius); text-decoration:none; color:inherit;">
+                        <span style="font-size:1.8rem;">&#128488;</span>
+                        <span style="flex:1;">
+                            <strong style="display:block; color:#22c55e;">کانال تلگرام Alvand Code</strong>
+                            <span style="color: rgba(255,255,255,0.6); font-size:0.85rem; direction:ltr; display:inline-block;">t.me/a_c_official &#8226; @a_c_official</span>
+                        </span>
+                        <span style="color:#22c55e; font-size:1.2rem;">&#8592;</span>
+                    </a>
+                    <a href="https://github.com/Alvandcode" target="_blank" rel="noopener"
+                       style="display:flex; align-items:center; gap:16px; padding:16px; background:rgba(129,140,248,0.12); border:1px solid rgba(129,140,248,0.4); border-radius:var(--radius); text-decoration:none; color:inherit;">
+                        <span style="font-size:1.8rem;">&#128025;</span>
+                        <span style="flex:1;">
+                            <strong style="display:block; color:#818cf8;">صفحه گیت‌هاب (سورس‌کد و پروژه‌ها)</strong>
+                            <span style="color: rgba(255,255,255,0.6); font-size:0.85rem; direction:ltr; display:inline-block;">github.com/Alvandcode</span>
+                        </span>
+                        <span style="color:#818cf8; font-size:1.2rem;">&#8592;</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="glass" style="padding: 20px;">
+                <p style="color: rgba(255,255,255,0.5); font-size:0.85rem; line-height:2;">
+                    &#128279; برای خرید نسخه حرفه‌ای، لینک‌های بالا را باز کنید و در تلگرام پیام دهید.<br>
+                    &#128230; اگر برنامه برایتان کارکرد و مفید بود، در کانال تلگرام دنبال کنید تا از به‌روزرسانی‌ها باخبر شوید.
+                </p>
             </div>
         </section>
         </main>
@@ -982,8 +1063,15 @@
     function updateDateTime() {
         const now = new Date();
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        let av=document.getElementById('aboutVersion'); if(av) av.textContent = APP_VERSION;
         let d=document.getElementById('currentDate'); if(d) d.textContent = now.toLocaleDateString('fa-IR', options);
         let t=document.getElementById('currentTime'); if(t) t.textContent = now.toLocaleTimeString('fa-IR');
+    }
+
+    function showSectionByName(section){
+        let items=document.querySelectorAll('.nav-item');
+        let idx=['dashboard','clients','tariffs','reports','income','reservations','customers','backup','about','contact'].indexOf(section);
+        showSection(section, idx>=0 && items[idx] ? items[idx] : null);
     }
 
     function showSection(section, el) {
